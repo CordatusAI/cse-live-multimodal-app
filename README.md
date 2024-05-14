@@ -1,5 +1,5 @@
 # Cordatus Stream Engine - Live Multimodal Application
-![Run the application](/assets/llava_player_gui_opt.mp4)
+https://github.com/CordatusAI/cse-live-multimodal-app/assets/24845205/15e224df-b53e-48a7-ab79-1acdf10c58a3
 
 In this application, we have demonstrated an example on how to extend our [CSE Camera Player Agent](https://github.com/CordatusAI/cse-camera-agent) GUI application to communicate in real-time with a LLaVA model deployed on the Ollama project. This sample GUI application aims to provide a foundation for VLM applications where camera streaming is required. It is built on top of CSE Camera Player Agent to benefit from Cordatus Stream Engine's low latency hardware accelerated live camera streaming capabilities for custom AI applications.
 
