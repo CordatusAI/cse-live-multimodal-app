@@ -16,7 +16,6 @@ frame:np.array =  None
 prompt:str = "Describe the scene concisely."
 output = deque()
 is_prompt_changed:bool = False
-is_connected = False
 is_loaded = False
 cam_types = ['CSI','USB', 'RTSP/HTTP']
 cse_target = "http://0.0.0.0:7005"
@@ -113,25 +112,21 @@ while True:  # Event Loop
         is_loaded = True
         time.sleep(0.01)
 
-    if is_connected == False and event == 'Connect':
+    if event == 'Connect':
         if client :
             client.close()
         stream_engine_ip = window['TARGET_IP'].get()
         cam_type = window['CAM_TYPE'].get()
         cam_path = window['CAM_SRC'].get()
         token = window['TOKEN'].get()
-        client = connect(client, stream_engine_ip, cam_type, cam_path, token)
+        # Close the connection every time a new camera request is made before openning it
         if client:
-            is_connected = True
-        else:
-            is_connected = False
+            client.close()
+        client = connect(client, stream_engine_ip, cam_type, cam_path, token)
         time.sleep(1)
 
     if client is None:
         continue
-
-    if event == 'ON_CHANGE':
-        is_connected = False
 
     if event == 'Change Prompt':
         prompt = window['INPUT'].get()
@@ -140,7 +135,6 @@ while True:  # Event Loop
         sg.cprint("Prompt has been changed: ", prompt)
         time.sleep(0.01)
 
-    # if is_connected:
     ret, frame = client.read()
     if ret:
         pframe = ImageTk.PhotoImage(Image.fromarray(frame).resize((1280,720)))

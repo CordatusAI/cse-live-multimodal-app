@@ -31,12 +31,27 @@ ps -ef | grep cordatus_se
 ![Service Port](/assets/cse_port.png)
 
 ## 1. Run Ollama
+On x86 platforms:
 ```
 docker run -d --rm --gpus=all \
            -p 11434:11434 \
            --name=ollama-server \
            -v ollama:/root/.ollama \
            ollama/ollama:latest
+```
+
+On NVIDIA Jetson platforms:
+```
+docker run -d --rm --runtime=nvidia \
+           -p 11434:11434 \
+           --name=ollama-server \
+           -v ollama:/root/.ollama \
+           ollama/ollama:latest
+```
+
+Pull the LLaVA model from Ollama repo:
+```
+docker exec ollama-server bash -c "ollama pull llava:7b-v1.6"
 ```
 
 ## 2. Building the Project Locally
@@ -48,14 +63,14 @@ or
 
 ./build_locally.sh 3.11
 ```
-To run the container:
+To run the container on x86 platforms:
 ```
 xhost + && \
 docker run -ti --rm --gpus=all \
            --network=host \
            -v /tmp/.X11-unix:/tmp/.X11-unix \
            -e DISPLAY=$DISPLAY \
-           cordatus-multimodal-app:v1.0-x86-py3.8.19
+           cordatus-multimodal-app:v1.0-x86_64-py3.8.19
 
 or
 
@@ -64,8 +79,28 @@ docker run -ti --rm --gpus=all \
            --network=host \
            -v /tmp/.X11-unix:/tmp/.X11-unix \
            -e DISPLAY=$DISPLAY \
-           cordatus-multimodal-app:v1.0-x86-py3.11.9
+           cordatus-multimodal-app:v1.0-x86_64-py3.11.9
 ```
+
+To run the container on NVIDIA Jetson platforms:
+```
+xhost + && \
+docker run -ti --rm --runtime=nvidia \
+           --network=host \
+           -v /tmp/.X11-unix:/tmp/.X11-unix \
+           -e DISPLAY=$DISPLAY \
+           cordatus-multimodal-app:v1.0-aarch64-py3.8.19
+
+or
+
+xhost + && \
+docker run -ti --rm --runtime=nvidia \
+           --network=host \
+           -v /tmp/.X11-unix:/tmp/.X11-unix \
+           -e DISPLAY=$DISPLAY \
+           cordatus-multimodal-app:v1.0-aarch64-py3.11.9
+```
+
 
 ## 3. Get Your Cordatus AI Token
 Navigate to the https://cordatus.ai and login to your account. Under the Devices tab, click on the `Actions` button of the target device and select `Generate Token`. This screen will provide you the necessary token information.
@@ -87,7 +122,6 @@ frame:np.array =  None
 prompt:str = "Describe the scene concisely."
 output = deque()
 is_prompt_changed:bool = False
-is_connected = False
 is_loaded = False
 cam_types = ['CSI','USB', 'RTSP/HTTP']
 cse_target = "http://0.0.0.0:7005"
@@ -202,7 +236,7 @@ while True:  # Event Loop
         is_loaded = True
         time.sleep(0.01)
 
-    if is_connected == False and event == 'Connect':
+    if event == 'Connect':
         if client :
             client.close()
         stream_engine_ip = window['TARGET_IP'].get()
@@ -211,16 +245,11 @@ while True:  # Event Loop
         token = window['TOKEN'].get()
         client = connect(client, stream_engine_ip, cam_type, cam_path, token)
         if client:
-            is_connected = True
-        else:
-            is_connected = False
+            client.close()
         time.sleep(1)
 
     if client is None:
         continue
-
-    if event == 'ON_CHANGE':
-        is_connected = False
 
     if event == 'Change Prompt':
         prompt = window['INPUT'].get()
@@ -229,7 +258,6 @@ while True:  # Event Loop
         sg.cprint("Prompt has been changed: ", prompt)
         time.sleep(0.01)
 
-    # if is_connected:
     ret, frame = client.read()
     if ret:
         pframe = ImageTk.PhotoImage(Image.fromarray(frame).resize((1280,720)))
