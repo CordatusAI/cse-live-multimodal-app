@@ -66,14 +66,13 @@ docker exec ollama-server bash -c "ollama pull llava-phi3:3.8b"
 
 ## 2. Building the Project Locally
 Depending on the Python version that your project requires, build the sample image by providing the version information as follows:
+
+### For Python 3.8:
+
 ```
 ./build_locally.sh 3.8
-
-or
-
-./build_locally.sh 3.11
 ```
-To run the container on x86 platforms:
+To run the container on x86 platforms for Python 3.8:
 ```
 xhost + && \
 docker run -ti --rm --gpus=all \
@@ -81,9 +80,24 @@ docker run -ti --rm --gpus=all \
            -v /tmp/.X11-unix:/tmp/.X11-unix \
            -e DISPLAY=$DISPLAY \
            cordatus-multimodal-app:v1.0-x86_64-py3.8.19
+```
 
-or
+To run the container on NVIDIA Jetson platforms for Python 3.8:
+```
+xhost + && \
+docker run -ti --rm --runtime=nvidia \
+           --network=host \
+           -v /tmp/.X11-unix:/tmp/.X11-unix \
+           -e DISPLAY=$DISPLAY \
+           cordatus-multimodal-app:v1.0-aarch64-py3.8.19
+```
 
+### For Python 3.11:
+```
+./build_locally.sh 3.11
+```
+To run the container on **x86** platforms for Python 3.11:
+```
 xhost + && \
 docker run -ti --rm --gpus=all \
            --network=host \
@@ -92,17 +106,8 @@ docker run -ti --rm --gpus=all \
            cordatus-multimodal-app:v1.0-x86_64-py3.11.9
 ```
 
-To run the container on NVIDIA Jetson platforms:
+To run the container on **NVIDIA Jetson** platforms for Python 3.11:
 ```
-xhost + && \
-docker run -ti --rm --runtime=nvidia \
-           --network=host \
-           -v /tmp/.X11-unix:/tmp/.X11-unix \
-           -e DISPLAY=$DISPLAY \
-           cordatus-multimodal-app:v1.0-aarch64-py3.8.19
-
-or
-
 xhost + && \
 docker run -ti --rm --runtime=nvidia \
            --network=host \
@@ -138,7 +143,9 @@ cse_target = "http://0.0.0.0:7005"
 cam_path = "http://renzo.dyndns.tv/mjpg/video.mjpg"
 interframe_duration = 1 / 33  # get how long to delay between frames
 
+## Change selection to LLaVA-Phi3 for a lighter model and faster execution
 model_selection = "llava:7b-v1.6"
+# model_selection = "llava-phi3:3.8b"
 
 client:ClientSE = None
 ```
