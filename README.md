@@ -43,15 +43,25 @@ docker run -d --rm --gpus=all \
 On NVIDIA Jetson platforms:
 ```
 docker run -d --rm --runtime=nvidia \
-           -p 11434:11434 \
-           --name=ollama-server \
-           -v ollama:/root/.ollama \
-           ollama/ollama:latest
+           --network=host \
+           --name=ollama-server
+           -v ~/ollama:/ollama \
+           -e OLLAMA_MODELS=/ollama \
+           dustynv/ollama:r36.2.0 bash -c "ollama serve"
 ```
 
-Pull the LLaVA model from Ollama repo:
+Pull the LLaVA model from Ollama repo on x86 platforms:
 ```
 docker exec ollama-server bash -c "ollama pull llava:7b-v1.6"
+```
+
+Pull the LLaVA or LLaVA-Phi3 model from Ollama repo on NVIDIA Jetson platform:
+```
+docker exec ollama-server bash -c "ollama pull llava:7b-v1.6"
+```
+or
+```
+docker exec ollama-server bash -c "ollama pull llava-phi3:3.8b"
 ```
 
 ## 2. Building the Project Locally
