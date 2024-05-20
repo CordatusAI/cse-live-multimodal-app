@@ -22,7 +22,9 @@ cse_target = "http://0.0.0.0:7005"
 cam_path = "http://renzo.dyndns.tv/mjpg/video.mjpg"
 interframe_duration = 1 / 33  # get how long to delay between frames
 
+## Change selection to LLaVA-Phi3 for a lighter model and faster execution
 model_selection = "llava:7b-v1.6"
+# model_selection = "llava-phi3:3.8b"
 
 client:ClientSE = None
 
